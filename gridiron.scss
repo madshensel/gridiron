@@ -1,0 +1,145 @@
+/*!
+    GRIDIRON
+*/
+
+// VARIABLES
+$is_responsive:     true!default;
+$columns:           12!default;
+$gutter:            24px!default;
+
+$breakpoints: (
+    //'large' 'only screen', 
+    'medium' 'only screen and (min-width: 600px) and (max-width: 1023px)',
+    'small' 'only screen and (min-width: 320px) and (max-width: 600px)'
+)!default;
+
+
+// FUNCTIONS
+
+@function _grid-col-width($col-num) {
+    $one-col: (100%/12);
+    @return #{$one-col*$col-num};
+} 
+
+
+
+// MIXINS
+
+@mixin _create-grid($namespace) {
+    @include _grid($namespace);
+    @include _grid-pull($namespace);
+    @include _grid-push($namespace);
+    @include _grid-offset($namespace); 
+}
+
+@mixin _grid($namespace) {
+    @for $i from 1 through $columns {
+        .#{$namespace}#{$i} {
+            width: _grid-col-width($i);
+        }
+    }  
+}
+
+@mixin _grid-pull($namespace:"") {
+    @for $i from 1 through $columns {
+        .#{$namespace}pull-#{$i} {
+            position: relative;
+            right: _grid-col-width($i);
+        }
+    }
+}
+
+@mixin _grid-push($namespace:"") {
+    @for $i from 1 through $columns {
+        .#{$namespace}push-#{$i} {
+            position: relative;
+            left: _grid-col-width($i);
+        }
+    }
+}
+
+@mixin _grid-offset($namespace:"") {
+    @for $i from 1 through $columns {
+        .#{$namespace}offset-#{$i} {
+            margin-left: _grid-col-width($i);
+        }
+    }
+}
+
+@mixin _grid-media-query($media-query) {
+    @each $breakpoint in $breakpoints {
+        $name: nth($breakpoint, 1);
+        $declaration: nth($breakpoint, 2);
+        @if $media-query == $name and $declaration {
+            @media #{$declaration} {
+                @content;
+            }
+        }
+    }
+}
+
+/*
+    GRID
+*/
+
+.grid {
+    list-style:none;
+    margin:0;               
+    padding:0; 
+    margin-left:-$gutter;              
+    letter-spacing:-0.25em;
+}
+.grid__column {
+    display:inline-block;           
+    padding-left:$gutter;           
+    vertical-align:top;                              
+    -webkit-box-sizing:border-box;  
+    -moz-box-sizing:border-box;  
+    box-sizing:border-box;  
+    letter-spacing:normal;
+    word-spacing:normal; 
+}
+
+// Removes the gutter
+.grid-collapse {
+    margin-left:0;
+    > .grid__column {
+        padding-left:0;
+    }
+}
+.grid-right {
+    text-align:right;
+    > .grid-item {
+        text-align:left;
+    }
+}
+.grid-center {
+    text-align:center;
+    > .grid-item{
+        text-align:left;
+    }
+}
+.grid-middle {
+    > .grid-item{
+        vertical-align:middle;
+    }
+}
+.grid-bottom {
+    > .grid-item{
+        vertical-align:bottom;
+    }
+}
+
+@include _create-grid('grid__column-');
+
+@if $is_responsive == true {
+    /*
+        MEDIA QUERIES
+    */
+    @each $breakpoint in $breakpoints {
+        $namespace: nth($breakpoint, 1);
+        @include _grid-media-query($namespace) {
+            @include _create-grid('#{$namespace}-');
+        }
+    }
+}
